@@ -5,3 +5,4 @@ authors = ["Joe Ardent <code@ardent.nebcorp.com>"]
 
 [dependencies]
 sdl2 = "0.22"
+time = "0.1"
