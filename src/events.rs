@@ -27,7 +27,7 @@ impl Events {
                 Quit { .. } => self.quit = true,
 
                 KeyDown { keycode, .. } => {
-                    println!("Got keycode {:?}", keycode);
+                    println!("{:?}", keycode.unwrap());
                     match keycode {
                         Some(Escape) => self.key_escape = true,
                         _ => {}
