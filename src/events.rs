@@ -1,47 +1,40 @@
-extern crate sdl2;
-use self::sdl2::EventPump;
+// extern crate sdl2;
 
-pub struct Events {
-    pump: EventPump,
-    pub quit: bool,
-    pub key_escape: bool,
-}
+macro_rules! struct_events {
+    ( /* PATTERN */ ) => {
+        use sdl2::EventPump;
 
-impl Events {
-    pub fn new(pump: EventPump) -> Events {
-        Events {
-            pump: pump,
-            quit: false,
-            key_escape: false,
+        pub struct ImmediateEvents;
+
+        impl ImmediateEvents {
+            pub fn new() -> ImmediateEvents {
+                ImmediateEvents
+            }
         }
-    }
 
-    pub fn pump(&mut self) {
-        // if the SDL context is dropped, then poll_iter() will simply stop
-        // yielding any input.
-        for event in self.pump.poll_iter() {
-            use sdl2::event::Event::*;
-            use sdl2::keyboard::Keycode::*;
+        pub struct Events {
+            pump: EventPump,
+            pub now: ImmediateEvents,
+        }
 
-            match event {
-                Quit { .. } => self.quit = true,
+        impl Events {
+            pub fn new(pump: EventPump) -> Events {
+                Events {
+                    pump: pump,
+                    now: ImmediateEvents::new()
+                }
+            }
 
-                KeyDown { keycode, .. } => {
-                    println!("{:?}", keycode.unwrap());
-                    match keycode {
-                        Some(Escape) => self.key_escape = true,
+            pub fn pump(&mut self) {
+
+                for event in self.pump.poll_iter() {
+                    use sdl2::event::Event::*;
+                    use sdl2::keyboard::Keycode::*;
+
+                    match event {
                         _ => {}
                     }
                 }
-
-                KeyUp { keycode, .. } => {
-                    match keycode {
-                        Some(Escape) => self.key_escape = false,
-                        _ => {}
-                    }
-                }
-
-                _ => {}
             }
         }
     }
