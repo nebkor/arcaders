@@ -6,7 +6,11 @@ mod events;
 
 use sdl2::pixels::Color;
 
-struct_events!();
+struct_events!{
+    keyboard: {
+        key_escape: Escape
+    }
+}
 
 fn main() {
     // Initialize SDL2
@@ -31,7 +35,7 @@ fn main() {
     loop {
         events.pump();
 
-        if true {
+        if events.now.key_escape == Some(true) {
             break;
         }
 
