@@ -8,7 +8,13 @@ use sdl2::pixels::Color;
 
 struct_events!{
     keyboard: {
-        key_escape: Escape
+        key_escape: Escape,
+        key_up: Up,
+        key_down: Down,
+        key_q: Q
+    },
+    else: {
+        quit: Quit { .. }
     }
 }
 
@@ -35,7 +41,7 @@ fn main() {
     loop {
         events.pump();
 
-        if events.now.key_escape == Some(true) {
+        if events.now.quit || events.now.key_escape == Some(true) || events.now.key_q == Some(false) {
             break;
         }
 
