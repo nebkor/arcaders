@@ -10,8 +10,7 @@ struct_events!{
     keyboard: {
         key_escape: Escape,
         key_up: Up,
-        key_down: Down,
-        key_q: Q
+        key_down: Down
     },
     else: {
         quit: Quit { .. }
@@ -41,7 +40,7 @@ fn main() {
     loop {
         events.pump();
 
-        if events.now.quit || events.now.key_escape == Some(true) || events.now.key_q == Some(false) {
+        if events.now.quit || events.now.key_escape == Some(true) {
             break;
         }
 
