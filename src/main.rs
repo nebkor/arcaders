@@ -1,21 +1,9 @@
 extern crate sdl2;
-extern crate time;
 
-#[macro_use]
-mod events;
+mod phi;
+mod views;
 
-use sdl2::pixels::Color;
-
-struct_events!{
-    keyboard: {
-        key_escape: Escape,
-        key_up: Up,
-        key_down: Down
-    },
-    else: {
-        quit: Quit { .. }
-    }
-}
+use phi::{Events, Phi, View, ViewAction};
 
 fn main() {
     // Initialize SDL2
@@ -29,25 +17,23 @@ fn main() {
         .build()
         .unwrap();
 
-    let mut renderer = window.renderer()
-        .accelerated()
-        .build()
-        .unwrap();
+    // context for the view's renderer
+    let mut context = Phi {
+        events: Events::new(sdl_context.event_pump().unwrap()),
+        renderer: window.renderer()
+            .accelerated()
+            .build()
+            .unwrap(),
+    };
 
-    // prepare the events record
-    let mut events = Events::new(sdl_context.event_pump().unwrap());
+    let mut current_view: Box<View> = Box::new(::views::DefaultView);
 
     loop {
-        events.pump();
+        context.events.pump();
 
-        if events.now.quit || events.now.key_escape == Some(true) {
-            break;
+        match current_view.render(&mut context, 0.01) {
+            ViewAction::None => context.renderer.present(),
+            ViewAction::Quit => break,
         }
-
-        // Render a fully blue window
-        renderer.set_draw_color(Color::RGB(0, 0, 255));
-        renderer.clear();
-        renderer.present();
-
     }
 }
