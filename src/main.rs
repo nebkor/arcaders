@@ -57,7 +57,7 @@ fn main() {
 
         context.events.pump();
 
-        match current_view.render(&mut context, 0.01) {
+        match current_view.render(&mut context, interval) {
             ViewAction::None => context.renderer.present(),
             ViewAction::Quit => break,
         }
