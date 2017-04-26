@@ -4,5 +4,5 @@ version = "0.1.0"
 authors = ["Joe Ardent <code@ardent.nebcorp.com>"]
 
 [dependencies]
-sdl2 = "0.22"
+sdl2 = "0.29"
 time = "0.1"
