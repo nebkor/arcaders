@@ -70,7 +70,7 @@ macro_rules! struct_events {
                                         // key pressed
                                         self.now.$k_alias = Some(true);
                                     }
-                                    println!("{}", keycode.unwrap());
+                                    println!("{}", $k_sdl);
                                     self.$k_alias = true;
                                 }
                             ),*
