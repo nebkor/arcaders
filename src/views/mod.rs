@@ -1,51 +1,73 @@
 use phi::{Phi, View, ViewAction, Events};
 use sdl2::pixels::Color;
+use sdl2::rect::Rect as SdlRect;
 
-pub struct ViewA;
-pub struct ViewB;
+// Constants
 
-fn do_quit(e: &Events) -> bool {
-    if e.now.quit || e.now.key_escape == Some(true) || e.now.key_q == Some(true) {
-        return true;
-    }
-    false
+// Data types
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Rectangle {
+    pub x: f64,
+    pub y: f64,
+    pub w: f64,
+    pub h: f64,
 }
 
-impl View for ViewA {
-    fn render(&mut self, context: &mut Phi, _: f64) -> ViewAction {
-        let renderer = &mut context.renderer;
-        let events = &context.events;
 
-        if do_quit(events) {
+struct Ship {
+    rect: Rectangle,
+}
+
+impl Rectangle {
+    /// Generates an SDL-compatible Rect equivalent to `self`.
+    /// Panics if it could not be created, for example if a
+    /// coordinate of a corner overflows an `i32`.
+    pub fn to_sdl(self) -> SdlRect {
+        // Reject negative width and height
+        assert!(self.w >= 0.0 && self.h >= 0.0);
+
+        // SdlRect::new : `(i32, i32, u32, u32) -> SdlRect`
+        SdlRect::new(self.x as i32, self.y as i32, self.w as u32, self.h as u32)
+    }
+}
+
+// View definitions
+
+pub struct ShipView {
+    player: Ship,
+}
+
+impl ShipView {
+    pub fn new(phi: &mut Phi) -> ShipView {
+        ShipView {
+            player: Ship {
+                rect: Rectangle {
+                    x: 64.0,
+                    y: 64.0,
+                    w: 32.0,
+                    h: 32.0,
+                },
+            },
+        }
+    }
+}
+
+impl View for ShipView {
+    fn render(&mut self, phi: &mut Phi, elapsed: f64) -> ViewAction {
+        if phi.events.now.quit || phi.events.now.key_escape == Some(true) {
             return ViewAction::Quit;
         }
 
-        if events.now.key_space == Some(true) {
-            return ViewAction::ChangeView(Box::new(ViewB));
-        }
+        // View logic here
 
-        renderer.set_draw_color(Color::RGB(0, 0, 255));
-        renderer.clear();
+        phi.renderer.set_draw_color(Color::RGB(0, 0, 255));
+        phi.renderer.clear();
 
-        ViewAction::None
-    }
-}
+        // View rendering here
 
-impl View for ViewB {
-    fn render(&mut self, context: &mut Phi, _: f64) -> ViewAction {
-        let renderer = &mut context.renderer;
-        let events = &context.events;
-
-        if do_quit(events) {
-            return ViewAction::Quit;
-        }
-
-        if events.now.key_space == Some(true) {
-            return ViewAction::ChangeView(Box::new(ViewA));
-        }
-
-        renderer.set_draw_color(Color::RGB(255, 0, 0));
-        renderer.clear();
+        phi.renderer.set_draw_color(Color::RGB(200, 200, 50));
+        phi.renderer.fill_rect(self.player.rect.to_sdl());
 
         ViewAction::None
     }
