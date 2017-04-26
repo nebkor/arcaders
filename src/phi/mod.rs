@@ -7,7 +7,9 @@ struct_events! {
     keyboard: {
         key_escape: Escape,
         key_up: Up,
-        key_down: Down
+        key_down: Down,
+        key_space: Space,
+        key_q: Q
     },
     else: {
         quit: Quit { .. }
