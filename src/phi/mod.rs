@@ -9,7 +9,8 @@ struct_events! {
         key_up: Up,
         key_down: Down,
         key_space: Space,
-        key_q: Q
+        key_left: Left,
+        key_right: Right
     },
     else: {
         quit: Quit { .. }

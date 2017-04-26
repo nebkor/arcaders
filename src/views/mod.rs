@@ -4,6 +4,8 @@ use sdl2::rect::Rect as SdlRect;
 
 // Constants
 
+const PLAYER_SPEED: f64 = 180.0;
+
 // Data types
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -68,6 +70,26 @@ impl View for ShipView {
 
         phi.renderer.set_draw_color(Color::RGB(200, 200, 50));
         phi.renderer.fill_rect(self.player.rect.to_sdl());
+
+        let diagonal = (phi.events.key_up ^ phi.events.key_down) &&
+                       (phi.events.key_left ^ phi.events.key_right);
+
+        let moved = if diagonal { 1.0 / 2.0f64.sqrt() } else { 1.0 } * PLAYER_SPEED * elapsed;
+
+        let dx = match (phi.events.key_left, phi.events.key_right) {
+            (true, true) | (false, false) => 0.0,
+            (true, false) => -moved,
+            (false, true) => moved,
+        };
+
+        let dy = match (phi.events.key_up, phi.events.key_down) {
+            (true, true) | (false, false) => 0.0,
+            (true, false) => -moved,
+            (false, true) => moved,
+        };
+
+        self.player.rect.x += dx;
+        self.player.rect.y += dy;
 
         ViewAction::None
     }
