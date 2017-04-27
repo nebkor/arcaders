@@ -15,7 +15,8 @@ macro_rules! struct_events {
             // Some(false) => was just released
             // None => nothing happening right now.
             $( pub $k_alias: Option<bool> , )*
-            $( pub $e_alias : bool ),*
+                $( pub $e_alias : bool ),* ,
+            resize: Option<(u32, u32)>
         }
 
         impl ImmediateEvents {
@@ -24,7 +25,8 @@ macro_rules! struct_events {
                     // when initialized, nothing has happened yet, so all are
                     // set to None
                     $( $k_alias: None , )*
-                    $( $e_alias: false ),*
+                    $( $e_alias: false ),* ,
+                    resize: None
                 }
             }
         }
@@ -49,14 +51,20 @@ macro_rules! struct_events {
                 }
             }
 
-            pub fn pump(&mut self) {
+            pub fn pump(&mut self, renderer: &mut ::sdl2::render::Renderer) {
                 self.now = ImmediateEvents::new();
 
                 for event in self.pump.poll_iter() {
                     use sdl2::event::Event::*;
+                    use sdl2::event::WindowEvent::*;
                     use sdl2::keyboard::Keycode::*;
 
                     match event {
+                        Window { window_id, win_event: Resized(x, y), .. } => {
+                            println!("Resized window {} to {}, {}", window_id, x, y);
+                            self.now.resize = Some(renderer.output_size().unwrap());
+                    },
+                        
                         KeyDown { keycode, .. } => match keycode {
                             // $( .. ),* containing $k_sdl and $k_alias means:
                             // "for every element ($k_alias : $k_sdl) pair,
