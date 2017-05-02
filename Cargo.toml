@@ -1,8 +1,12 @@
 [package]
+authors = ["Joe Ardent <code@ardent.nebcorp.com>"]
 name = "arcaders"
 version = "0.1.0"
-authors = ["Joe Ardent <code@ardent.nebcorp.com>"]
 
 [dependencies]
-sdl2 = "0.29"
 time = "0.1"
+
+[dependencies.sdl2]
+default-features = false
+features = ["image"]
+version = "0.29"
