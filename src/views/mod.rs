@@ -66,7 +66,8 @@ impl View for ShipView {
             }
         };
 
-        phi.renderer.copy(&mut self.player.tex,
+        // we're currently throwing the result of this away
+        let _ = phi.renderer.copy(&mut self.player.tex,
                           //? The "source region" of the image. Here, we take the entire image, from
                           //? the top-left corner (0,0) to the bottom-right one (rect.w, rect.h).
                           Rectangle {
