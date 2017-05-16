@@ -10,11 +10,31 @@ use std::path::Path;
 // Constants
 const PLAYER_SPEED: f64 = 180.0;
 
+const SHIP_W: f64 = 43.0;
+const SHIP_H: f64 = 39.0;
+
 // Data types
 struct Ship {
     rect: Rectangle,
-    sprite: Sprite,
+    sprites: Vec<Sprite>,
+    current: ShipFrame,
 }
+
+/// The different states our ship might be in. In the image, they're ordered
+/// from left to right, then from top to bottom.
+#[derive(Clone, Copy)]
+enum ShipFrame {
+    UpNorm = 0,
+    UpFast = 1,
+    UpSlow = 2,
+    MidNorm = 3,
+    MidFast = 4,
+    MidSlow = 5,
+    DownNorm = 6,
+    DownFast = 7,
+    DownSlow = 8,
+}
+
 
 // View definitions
 
@@ -26,21 +46,32 @@ impl ShipView {
     pub fn new(phi: &mut Phi) -> ShipView {
         // ? Load the texture from the filesystem.
         // ? If it cannot be found, then there is no point in continuing: panic!
-        let sprite = Sprite::load(&mut phi.renderer, "assets/spaceship.png").unwrap();
+        let spritesheet = Sprite::load(&mut phi.renderer, "assets/spaceship.png").unwrap();
 
-        // ? Destructure some properties of the texture, notably width and
-        // ? height, which we will use for the ship's bounding box.
-        let (w, h) = sprite.size();
+        let mut sprites = Vec::with_capacity(9);
+
+        for y in 0..3 {
+            for x in 0..3 {
+                sprites.push(spritesheet.region(Rectangle {
+                        w: SHIP_W,
+                        h: SHIP_H,
+                        x: SHIP_W * x as f64,
+                        y: SHIP_H * y as f64,
+                    })
+                    .unwrap());
+            }
+        }
 
         ShipView {
             player: Ship {
                 rect: Rectangle {
                     x: 64.0,
                     y: 64.0,
-                    w: w,
-                    h: h,
+                    w: SHIP_W,
+                    h: SHIP_H,
                 },
-                sprite: sprite,
+                sprites: sprites,
+                current: ShipFrame::MidNorm,
             },
         }
     }
@@ -68,7 +99,7 @@ impl View for ShipView {
         };
 
         // render the sprite
-        self.player.sprite.render(&mut phi.renderer, self.player.rect);
+
 
         let diagonal = (phi.events.key_up ^ phi.events.key_down) &&
                        (phi.events.key_left ^ phi.events.key_right);
@@ -105,6 +136,31 @@ impl View for ShipView {
         // If the player cannot fit in the screen, then there is a problem and
         // the game should be promptly aborted.
         self.player.rect = self.player.rect.move_inside(movable_region).unwrap();
+
+        self.player.current = if dx == 0.0 && dy < 0.0 {
+            ShipFrame::UpNorm
+        } else if dx > 0.0 && dy < 0.0 {
+            ShipFrame::UpFast
+        } else if dx < 0.0 && dy < 0.0 {
+            ShipFrame::UpSlow
+        } else if dx == 0.0 && dy == 0.0 {
+            ShipFrame::MidNorm
+        } else if dx > 0.0 && dy == 0.0 {
+            ShipFrame::MidFast
+        } else if dx < 0.0 && dy == 0.0 {
+            ShipFrame::MidSlow
+        } else if dx == 0.0 && dy > 0.0 {
+            ShipFrame::DownNorm
+        } else if dx > 0.0 && dy > 0.0 {
+            ShipFrame::DownFast
+        } else if dx < 0.0 && dy > 0.0 {
+            ShipFrame::DownSlow
+        } else {
+            unreachable!()
+        };
+
+        self.player.sprites[self.player.current as usize]
+            .render(&mut phi.renderer, self.player.rect);
 
         ViewAction::None
     }
