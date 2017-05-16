@@ -16,8 +16,11 @@ impl Rectangle {
         // Reject negative width and height
         assert!(self.w >= 0.0 && self.h >= 0.0);
 
-        // SdlRect::new : `(i32, i32, u32, u32) -> SdlRect`
-        Some(SdlRect::new(self.x as i32, self.y as i32, self.w as u32, self.h as u32))
+        if self.w == 0.0 && self.h == 0.0 {
+            None
+        } else {
+            Some(SdlRect::new(self.x as i32, self.y as i32, self.w as u32, self.h as u32))
+        }
     }
 
     /// Return a (perhaps moved) rectangle which is contained by a `parent`
