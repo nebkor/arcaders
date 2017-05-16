@@ -5,6 +5,15 @@ use std::rc::Rc;
 use sdl2::render::{Renderer, Texture};
 use sdl2::image::LoadTexture;
 
+pub trait CopySprite {
+    fn copy_sprite(&mut self, sprite: &Sprite, dest: Rectangle);
+}
+
+impl<'window> CopySprite for Renderer<'window> {
+    fn copy_sprite(&mut self, sprite: &Sprite, dest: Rectangle) {
+        sprite.render(self, dest);
+    }
+}
 
 #[derive(Clone)]
 pub struct Sprite {
