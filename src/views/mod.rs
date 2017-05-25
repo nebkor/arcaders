@@ -20,6 +20,14 @@ struct Ship {
     current: ShipFrame,
 }
 
+#[derive(Clone)]
+struct Background {
+    pos: f64,
+    // The amount of pixels moved to the left every second
+    vel: f64,
+    sprite: Sprite,
+}
+
 /// The different states our ship might be in. In the image, they're ordered
 /// from left to right, then from top to bottom.
 #[derive(Clone, Copy)]
@@ -90,7 +98,7 @@ impl View for ShipView {
 
         // View rendering here
 
-        phi.renderer.set_draw_color(Color::RGB(200, 200, 50));
+        phi.renderer.set_draw_color(Color::RGB(0, 0, 255));
         match phi.renderer.fill_rect(self.player.rect.to_sdl().unwrap()) {
             Ok(_) => {}
             Err(e) => {
