@@ -2,16 +2,19 @@ use phi::{Phi, View, ViewAction};
 use phi::data::Rectangle;
 use phi::gfx::{CopySprite, Sprite};
 use sdl2::pixels::Color;
-use sdl2::render::{Texture, TextureQuery};
-use sdl2::image::LoadTexture;
+// use sdl2::render::{Texture, TextureQuery};
+// use sdl2::image::LoadTexture;
+use sdl2::render::Renderer;
 
-use std::path::Path;
+// use std::path::Path;
 
 // Constants
 const PLAYER_SPEED: f64 = 180.0;
 
 const SHIP_W: f64 = 43.0;
 const SHIP_H: f64 = 39.0;
+
+const DEBUG: bool = false;
 
 // Data types
 struct Ship {
@@ -45,10 +48,47 @@ enum ShipFrame {
 
 
 // View definitions
-
 pub struct ShipView {
     player: Ship,
+
+    bg_back: Background,
+    bg_middle: Background,
+    bg_front: Background,
 }
+
+impl Background {
+    fn render(&mut self, renderer: &mut Renderer, elapsed: f64) {
+        // We define a logical position as depending solely on the time and the
+        // dimensions of the image, not on the screen's size.
+        let size = self.sprite.size();
+        self.pos += self.vel * elapsed;
+        if self.pos > size.0 {
+            self.pos -= size.0;
+        }
+
+        // We determine the scale ratio of the window to the sprite.
+        let (win_w, win_h) = renderer.output_size().unwrap();
+        let scale = win_h as f64 / size.1;
+
+        // We render as many copies of the background as necessary to fill
+        // the screen.
+        let mut physical_left = -self.pos * scale;
+
+        while physical_left < win_w as f64 {
+            // ? While the left of the image is still inside of the window...
+            renderer.copy_sprite(&self.sprite,
+                                 Rectangle {
+                                     x: physical_left,
+                                     y: 0.0,
+                                     w: size.0 * scale,
+                                     h: win_h as f64,
+                                 });
+
+            physical_left += size.0 * scale;
+        }
+    }
+}
+
 
 impl ShipView {
     pub fn new(phi: &mut Phi) -> ShipView {
@@ -81,6 +121,22 @@ impl ShipView {
                 sprites: sprites,
                 current: ShipFrame::MidNorm,
             },
+
+            bg_back: Background {
+                pos: 0.0,
+                vel: 20.0,
+                sprite: Sprite::load(&mut phi.renderer, "assets/starBG.png").unwrap(),
+            },
+            bg_middle: Background {
+                pos: 0.0,
+                vel: 40.0,
+                sprite: Sprite::load(&mut phi.renderer, "assets/starMG.png").unwrap(),
+            },
+            bg_front: Background {
+                pos: 0.0,
+                vel: 80.0,
+                sprite: Sprite::load(&mut phi.renderer, "assets/starFG.png").unwrap(),
+            },
         }
     }
 }
@@ -90,25 +146,31 @@ impl View for ShipView {
         if phi.events.now.quit || phi.events.now.key_escape == Some(true) {
             return ViewAction::Quit;
         }
-
         // View logic here
 
-        phi.renderer.set_draw_color(Color::RGB(0, 0, 255));
+        // clear the view
+        phi.renderer.set_draw_color(Color::RGB(0, 0, 0));
         phi.renderer.clear();
 
-        // View rendering here
+        // Render the Backgrounds
+        self.bg_back.render(&mut phi.renderer, elapsed);
+        self.bg_middle.render(&mut phi.renderer, elapsed);
 
-        phi.renderer.set_draw_color(Color::RGB(0, 0, 255));
-        match phi.renderer.fill_rect(self.player.rect.to_sdl().unwrap()) {
-            Ok(_) => {}
-            Err(e) => {
-                println!("Got error {} from fill_rect", e);
-            }
-        };
+        // Render the bounding box (for debugging purposes)
+        if DEBUG {
+            phi.renderer.set_draw_color(Color::RGB(200, 200, 50));
+            let _ = phi.renderer.fill_rect(self.player.rect.to_sdl().unwrap());
+        }
+
+        // Render the ship
+        phi.renderer.copy_sprite(&self.player.sprites[self.player.current as usize],
+                                 self.player.rect);
+
+        // Render the foreground
+        self.bg_front.render(&mut phi.renderer, elapsed);
+
 
         // render the sprite
-
-
         let diagonal = (phi.events.key_up ^ phi.events.key_down) &&
                        (phi.events.key_left ^ phi.events.key_right);
 
@@ -166,9 +228,6 @@ impl View for ShipView {
         } else {
             unreachable!()
         };
-
-        phi.renderer.copy_sprite(&self.player.sprites[self.player.current as usize],
-                                 self.player.rect);
 
         ViewAction::None
     }
