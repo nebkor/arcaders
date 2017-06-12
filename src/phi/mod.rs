@@ -3,7 +3,7 @@ mod events;
 pub mod data;
 pub mod gfx;
 
-use sdl2::render::Renderer;
+use sdl2::render::Canvas;
 
 struct_events! {
     keyboard: {
@@ -24,11 +24,11 @@ struct_events! {
 /// can be passed easily between functions.
 pub struct Phi<'window> {
     pub events: Events,
-    pub renderer: Renderer<'window>,
+    pub renderer: Canvas<'window>,
 }
 
 impl<'window> Phi<'window> {
-    fn new(events: Events, renderer: Renderer<'window>) -> Phi<'window> {
+    fn new(events: Events, renderer: Canvas<'window>) -> Phi<'window> {
         Phi {
             events: events,
             renderer: renderer,
@@ -107,7 +107,7 @@ pub fn spawn<F>(title: &str, init: F)
 
     // Create the context
     let mut context = Phi::new(Events::new(sdl_context.event_pump().unwrap()),
-                               window.renderer()
+                               window.into_canvas()
                                    .accelerated()
                                    .build()
                                    .unwrap());
