@@ -8,5 +8,5 @@ time = "0.1"
 
 [dependencies.sdl2]
 default-features = false
-features = ["image", "ttf"]
-version = "0.30"
+features = ["image"]
+version = "0.29"

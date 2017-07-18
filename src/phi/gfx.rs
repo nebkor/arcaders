@@ -2,14 +2,14 @@ use phi::data::Rectangle;
 use std::cell::RefCell;
 use std::path::Path;
 use std::rc::Rc;
-use sdl2::render::{Canvas, Texture};
+use sdl2::render::{Renderer, Texture};
 use sdl2::image::LoadTexture;
 
 pub trait CopySprite {
     fn copy_sprite(&mut self, sprite: &Sprite, dest: Rectangle);
 }
 
-impl<'window> CopySprite for Canvas<'window> {
+impl<'window> CopySprite for Renderer<'window> {
     fn copy_sprite(&mut self, sprite: &Sprite, dest: Rectangle) {
         sprite.render(self, dest);
     }
@@ -39,7 +39,7 @@ impl Sprite {
 
     /// Creates a new sprite from an image file located at the given path.
     /// Returns `Some` if the file could be read, and `None` otherwise.
-    pub fn load(renderer: &Canvas, path: &str) -> Option<Sprite> {
+    pub fn load(renderer: &Renderer, path: &str) -> Option<Sprite> {
         renderer.load_texture(Path::new(path)).ok().map(Sprite::new)
     }
 
@@ -70,7 +70,7 @@ impl Sprite {
         (self.src.w, self.src.h)
     }
 
-    pub fn render(&self, renderer: &mut Canvas, dest: Rectangle) {
+    pub fn render(&self, renderer: &mut Renderer, dest: Rectangle) {
         let _ = renderer.copy(&mut self.tex.borrow_mut(), self.src.to_sdl(), dest.to_sdl());
     }
 }

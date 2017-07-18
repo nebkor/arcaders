@@ -4,7 +4,7 @@ use phi::gfx::{CopySprite, Sprite};
 use sdl2::pixels::Color;
 // use sdl2::render::{Texture, TextureQuery};
 // use sdl2::image::LoadTexture;
-use sdl2::render::Canvas;
+use sdl2::render::Renderer;
 
 // use std::path::Path;
 
@@ -57,7 +57,7 @@ pub struct ShipView {
 }
 
 impl Background {
-    fn render(&mut self, renderer: &mut Canvas, elapsed: f64) {
+    fn render(&mut self, renderer: &mut Renderer, elapsed: f64) {
         // We define a logical position as depending solely on the time and the
         // dimensions of the image, not on the screen's size.
         let size = self.sprite.size();
