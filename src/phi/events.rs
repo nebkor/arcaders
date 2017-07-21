@@ -53,12 +53,11 @@ macro_rules! struct_events {
 
             pub fn pump(&mut self, renderer: &mut ::sdl2::render::Renderer) {
                 self.now = ImmediateEvents::new();
+                use sdl2::event::Event::*;
+                use sdl2::event::WindowEvent::*;
+                use sdl2::keyboard::Keycode::*;
 
                 for event in self.pump.poll_iter() {
-                    use sdl2::event::Event::*;
-                    use sdl2::event::WindowEvent::*;
-                    use sdl2::keyboard::Keycode::*;
-
                     match event {
                         Window { window_id, win_event: Resized(x, y), .. } => {
                             println!("Resized window {} to {}, {}", window_id, x, y);
