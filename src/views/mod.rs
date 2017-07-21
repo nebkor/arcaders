@@ -1,4 +1,4 @@
-use phi::{Phi, View, ViewAction};
+use phi::{Phi, ViewAction};
 use phi::data::Rectangle;
 use phi::gfx::{CopySprite, Sprite};
 use sdl2::pixels::Color;
@@ -17,19 +17,6 @@ const SHIP_H: f64 = 39.0;
 const DEBUG: bool = false;
 
 // Data types
-struct Ship {
-    rect: Rectangle,
-    sprites: Vec<Sprite>,
-    current: ShipFrame,
-}
-
-#[derive(Clone)]
-struct Background {
-    pos: f64,
-    // The amount of pixels moved to the left every second
-    vel: f64,
-    sprite: Sprite,
-}
 
 /// The different states our ship might be in. In the image, they're ordered
 /// from left to right, then from top to bottom.
@@ -47,13 +34,18 @@ enum ShipFrame {
 }
 
 
-// View definitions
-pub struct ShipView {
-    player: Ship,
+struct Ship {
+    rect: Rectangle,
+    sprites: Vec<Sprite>,
+    current: ShipFrame,
+}
 
-    bg_back: Background,
-    bg_middle: Background,
-    bg_front: Background,
+#[derive(Clone)]
+struct Background {
+    pos: f64,
+    // The amount of pixels moved to the left every second
+    vel: f64,
+    sprite: Sprite,
 }
 
 impl Background {
@@ -89,6 +81,14 @@ impl Background {
     }
 }
 
+// View definitions
+pub struct ShipView {
+    player: Ship,
+
+    bg_back: Background,
+    bg_middle: Background,
+    bg_front: Background,
+}
 
 impl ShipView {
     pub fn new(phi: &mut Phi) -> ShipView {
@@ -140,6 +140,40 @@ impl ShipView {
         }
     }
 }
+
+pub trait View {
+    /// Called on every frame to take care of both the logic and
+    /// the rendering of the current view.
+    ///
+    /// `elapsed` is expressed in seconds.
+    fn render(&mut self, context: &mut Phi, elapsed: f64) -> ViewAction;
+}
+
+/// # Examples
+///
+/// Here, we simply show a window with color #ffff00 and exit when escape is
+/// pressed or when the window is closed.
+///
+/// ```
+/// struct MyView;
+///
+/// impl View for MyView {
+///     fn render(&mut self, context: &mut Phi, _: f64) -> ViewAction {
+///         if context.events.now.quit {
+///             return ViewAction::Quit;
+///         }
+///
+///         context.renderer.set_draw_color(Color::RGB(255, 255, 0));
+///         context.renderer.clear();
+///         ViewAction::None
+///     }
+/// }
+///
+/// spawn("Example", |_| {
+///     Box::new(MyView)
+/// });
+/// ````
+
 
 impl View for ShipView {
     fn render(&mut self, phi: &mut Phi, elapsed: f64) -> ViewAction {

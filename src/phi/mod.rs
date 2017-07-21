@@ -3,6 +3,8 @@ mod events;
 pub mod data;
 pub mod gfx;
 
+use views::View;
+
 use sdl2::render::Renderer;
 
 struct_events! {
@@ -51,43 +53,9 @@ pub enum ViewAction {
     ChangeView(Box<View>),
 }
 
-
-pub trait View {
-    /// Called on every frame to take care of both the logic and
-    /// the rendering of the current view.
-    ///
-    /// `elapsed` is expressed in seconds.
-    fn render(&mut self, context: &mut Phi, elapsed: f64) -> ViewAction;
-}
-
 /// Create a window with name `title`, initialize the underlying libraries and
 /// start the game with the `View` returned by `init()`.
 ///
-/// # Examples
-///
-/// Here, we simply show a window with color #ffff00 and exit when escape is
-/// pressed or when the window is closed.
-///
-/// ```
-/// struct MyView;
-///
-/// impl View for MyView {
-///     fn render(&mut self, context: &mut Phi, _: f64) -> ViewAction {
-///         if context.events.now.quit {
-///             return ViewAction::Quit;
-///         }
-///
-///         context.renderer.set_draw_color(Color::RGB(255, 255, 0));
-///         context.renderer.clear();
-///         ViewAction::None
-///     }
-/// }
-///
-/// spawn("Example", |_| {
-///     Box::new(MyView)
-/// });
-/// ```
-
 pub fn spawn<F>(title: &str, init: F)
     where F: Fn(&mut Phi) -> Box<View>
 {
